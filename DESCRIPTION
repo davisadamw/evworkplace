@@ -1,5 +1,5 @@
 Package: evworkplace
-Title: What the Package Does (One Line, Title Case)
+Title: Produce Workplace Charging Demand for an EV Ownership Scenario
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Adam",
@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "davisadamw@gmail.com",
            comment = c(ORCID = "https://orcid.org/0000-0001-6324-6380"))
-Description: What the package does (one paragraph).
+Description: This package estimate workplace charging demand for an EV adoption scenario produced using the stocked package.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
