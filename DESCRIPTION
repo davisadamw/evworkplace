@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "davisadamw@gmail.com",
            comment = c(ORCID = "https://orcid.org/0000-0001-6324-6380"))
-Description: This package estimate workplace charging demand for an EV adoption scenario produced using the stocked package.
+Description: This package estimates workplace charging demand for an EV adoption scenario produced using the stocked package.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
