@@ -33,6 +33,14 @@ not it can be installed with:
 devtools::install_github("davisadamw/stocked")
 ```
 
+## TODOs
+
+-   Simplify the commute assignment component so that it’s small enough
+    to fit in the package
+-   Identify key charging parameters to provide access to, lock the rest
+    in place
+-   Finally, convert events to kWh
+
 ## Example
 
 *in progress*
