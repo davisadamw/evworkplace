@@ -6,7 +6,7 @@
 \alias{evworkplace-package}
 \title{evworkplace: Produce Workplace Charging Demand for an EV Ownership Scenario}
 \description{
-This package estimate workplace charging demand for an EV adoption scenario produced using the stocked package.
+This package estimates workplace charging demand for an EV adoption scenario produced using the stocked package.
 }
 \seealso{
 Useful links:

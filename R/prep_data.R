@@ -1,8 +1,12 @@
 #' Prep block-group-level predictors of EV adoption.
 #'
-#' @param max_evs Maximum proportion of vehicles in any block group to be converted to EVs.
+#' This function prepares the included \code{\link{dvrpc_bg_data}}
 #'
-#' @return A dataset of block group predictors that have been centered and scaled for use in the assignment model, defaults to 70%
+#' @param max_evs Maximum proportion of vehicles in any block group to be
+#'   converted to EVs.
+#'
+#' @return A dataset of block group predictors that have been centered and
+#'   scaled for use in the assignment model, defaults to 70%
 #' @export
 #'
 #' @examples

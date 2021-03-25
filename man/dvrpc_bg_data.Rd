@@ -5,22 +5,21 @@
 \alias{dvrpc_bg_data}
 \title{EV adoption data for the DVRPC region.}
 \format{
-A data frame with 7128 rows and 13 variables:
-\describe{
+A data frame with 7128 rows and 13 variables: \describe{
 \item{GEOID}{FIPS code for each block group in the region}
 \item{vehicles}{Number of privately owned vehicles in the block group}
-\item{ev_frac}{evs_start / vehicles}
-\item{evs_start}{Number of electric vehicles in the block group at the start of our analysis}
+\item{ev_frac}{evs_start / vehicles} \item{evs_start}{Number of electric
+vehicles in the block group at the start of our analysis}
 \item{households}{Number of households in the block group}
 \item{med_income}{Median household income of the block group, dollars}
 \item{apartment}{Number of households living in apartments}
 \item{mobile_home}{Number of households living in mobile homes}
-\item{single_attached}{Number of households living in attached single family houses}
-\item{single_detached}{Number of households living in detached single family houses}
-\item{WgtAvgHOVShare_Mi}{Ignore this column}
-\item{WgtAvgCmtDst_Mi}{Average commute distance of people living in this block group, miles}
-\item{nb_ev_ownership}{Weighted average EV adoption rate in surrounding block groups}
-}
+\item{single_attached}{Number of households living in attached single
+family houses} \item{single_detached}{Number of households living in
+detached single family houses} \item{WgtAvgHOVShare_Mi}{Ignore this column}
+\item{WgtAvgCmtDst_Mi}{Average commute distance of people living in this
+block group, miles} \item{nb_ev_ownership}{Weighted average EV adoption
+rate in surrounding block groups} }
 }
 \source{
 Most data from American Community Survey 2015-2019 5-year averages.
@@ -29,6 +28,7 @@ Most data from American Community Survey 2015-2019 5-year averages.
 dvrpc_bg_data
 }
 \description{
-A dataset containing block-group-level information for the Delaware Valley Region relevant to EV adoption.
+A dataset containing block-group-level information for the Delaware Valley
+Region relevant to EV adoption.
 }
 \keyword{datasets}

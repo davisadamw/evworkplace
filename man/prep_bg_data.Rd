@@ -7,13 +7,15 @@
 prep_bg_data(max_evs = 0.7)
 }
 \arguments{
-\item{max_evs}{Maximum proportion of vehicles in any block group to be converted to EVs.}
+\item{max_evs}{Maximum proportion of vehicles in any block group to be
+converted to EVs.}
 }
 \value{
-A dataset of block group predictors that have been centered and scaled for use in the assignment model, defaults to 70\%
+A dataset of block group predictors that have been centered and
+scaled for use in the assignment model, defaults to 70\%
 }
 \description{
-Prep block-group-level predictors of EV adoption.
+This function prepares the included \code{\link{dvrpc_bg_data}}
 }
 \examples{
 prepped_data <- prep_bg_data(max_evs = 0.5)
