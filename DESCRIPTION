@@ -20,8 +20,13 @@ Depends:
 Imports: 
     magrittr,
     stocked (>= 0.0.0.9000),
-    rlang,
+    rlang (>= 0.1.2),
     sf,
-    dplyr
+    dplyr,
+    purrr,
+    tibble,
+    stats
 Remotes: 
     davisadamw/stocked
+Suggests: 
+    roxygen2
