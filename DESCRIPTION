@@ -21,6 +21,7 @@ Imports:
     magrittr,
     stocked (>= 0.0.0.9000),
     rlang,
-    sf
+    sf,
+    dplyr
 Remotes: 
     davisadamw/stocked
