@@ -19,3 +19,19 @@
 #' }
 #' @source Most data from American Community Survey 2015-2019 5-year averages.
 "dvrpc_bg_data"
+
+#' Adoption model coefficients for this study.
+#'
+#' A dataset containing two sets of model coefficients to use for EV assignment.
+#'
+#' Currently included coefficients are derived from models for BEV and PHEV adoption in California.
+#' A paper from this study is in review in *Transportation Research Record* as
+#' "Investigating the sensitivity of electric vehicle out-of-home charging demand to changes in light-duty vehicle fleet makeup and usage, a case study for California 2030"
+#'
+#' @format A named of two data frames with model coefficients, with entries named `BEV` and `PHEV`. Each data frame has 8 rows and 2 variables:
+#' \describe{
+#'   \item{Variable}{Variable name, all but intercept, p, and q must match the name of a column in the block group dataset}
+#'   \item{Coefficient}{Coefficient of this column in model for base adoption rate}
+#' }
+"assignment_model_coefficients"
+
