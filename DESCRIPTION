@@ -29,4 +29,7 @@ Imports:
 Remotes: 
     davisadamw/stocked
 Suggests: 
+    rmarkdown,
+    knitr,
     roxygen2
+VignetteBuilder: knitr

@@ -1,0 +1,59 @@
+---
+title: "EV Home and Work Assignment Workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{EV Home and Work Assignment Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this example, we're going to assign 250,000 BEVs and 100,000 PHEVs to the study area and estimate total charging demand at commute destinations.
+
+Load the required packages.
+```{r setup}
+library(tidyverse)
+library(evworkplace)
+```
+
+The functions in this package have defaults set for all parameters, but it's a good idea to specify them individually. The parameters for this analysis are:
+* Maximum EV fraction in a single block group (default = 70%)
+* Commute fraction for EVs (default = 60%)
+```{r params}
+max_ev_fraction  <- 0.7
+commute_fraction <- 0.6
+```
+
+
+## Prepare data and assign EVs
+
+First, we need to prepare the data. All of the input data is included in this package, but some cleaning is required to make the data usable.
+
+First, let's look at the raw data, which has a range of information about each of the block groups in the study area. Note that `vehicles` provides the total number of household vehicles in the block group:
+```{r}
+dvrpc_bg_data
+```
+
+The vehicle assignment function requires input variables to be centered on 0 and scaled to have a standard deviation of 1. Additionally, this is where we specify the maximum potential number of vehicles that can be converted to EVs in any adoption scenario.
+```{r prep-data}
+prepped_data <- prep_bg_data(max_evs = max_ev_fraction)
+prepped_data
+```
+
+Create and run vehicle assignment scenarios. Note that these scenarios are currently run independently, which has the benefit of making it possible to specify multiple BEV or PHEV scenarios at once. The downside of this is that the total number of vehicles assigned to a block group across a scenario each for BEVs and PHEVs may be greater than the total number of vehicles in the block group. This can generally be avoided by setting `max_ev_fraction` to 0.7 or lower and running scenarios with no more than 50% total vehicle electrification.
+```{r assign-vehicles}
+adoption_scenario <- prepped_data %>%
+  assign_evs(250000, evworkplace::assignment_model_coefficients$CA_bev,  "bevs_250k") %>%
+  assign_evs(100000, evworkplace::assignment_model_coefficients$CA_phev, "phevs_100k")
+
+adoption_scenario %>% 
+  select(GEOID, bevs_250k, phevs_100k)
+
+```
+
