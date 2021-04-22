@@ -5,7 +5,7 @@
 \alias{assignment_model_coefficients}
 \title{Adoption model coefficients for this study.}
 \format{
-A named of two data frames with model coefficients, with entries
+A named list of two data frames with model coefficients, with entries
 named \code{BEV} and \code{PHEV}. Each data frame has 8 rows and 2 variables:
 \describe{ \item{Variable}{Variable name, all but intercept, p, and q must
 match the name of a column in the block group dataset}

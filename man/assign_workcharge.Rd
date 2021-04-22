@@ -15,3 +15,6 @@ assign_workcharge(ev_tots)
 \description{
 Title
 }
+\examples{
+sum(1)
+}
