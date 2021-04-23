@@ -35,8 +35,7 @@ devtools::install_github("davisadamw/stocked")
 ```
 
 ## TODOs
-* Identify key charging parameters to provide access to, lock the rest in place
-* Finally, convert events to kWh
+* Fix charging stuff
 
 ## Example
 
