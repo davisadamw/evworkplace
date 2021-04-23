@@ -2,19 +2,46 @@
 % Please edit documentation in R/assign_workcharge.R
 \name{assign_workcharge}
 \alias{assign_workcharge}
-\title{Title}
+\title{Create work charging events and demand}
 \usage{
-assign_workcharge(ev_tots)
+assign_workcharge(
+  prepped_data,
+  commute_ev_col,
+  charging_probs,
+  commute_miles_frac = 0.5,
+  miles_per_kWh = 4
+)
 }
 \arguments{
-\item{ev_tots}{}
+\item{prepped_data}{EV commute counts produced by \code{\link{prep_workcharge}}}
+
+\item{commute_ev_col}{Unquoted name of column in \code{prepped_data} that contains the EV count for this scenario}
+
+\item{charging_probs}{Work charging probabilities produced by \code{\link{make_workcharge_probs}}}
+
+\item{commute_miles_frac}{What fraction of total travel is for commute?}
+
+\item{miles_per_kWh}{Vehicle miles per kilowatt hour}
 }
 \value{
-
+A data frame of work charging events and kWh for the scenario in each block group
 }
 \description{
-Title
+Create work charging events and demand for a given EV adoption and charging scenario
 }
 \examples{
-sum(1)
+# First, create a work charging dataset using only 50\% of EVs for commuting:
+ev_commuter_count <- ev_totals_sample \%>\%
+  prep_workcharge(bevs_20k, phevs_10k, .ev_commute_frac = 0.5)
+
+# create a charging scenario each for BEVs and PHEVs
+bev_chargeprob  <- make_workcharge_probs(use_BEV = TRUE)
+phev_chargeprob <- make_workcharge_probs(use_BEV = FALSE)
+
+# run the workplace charging calculator
+ev_workplace_demand_bev20 <- ev_commuter_count \%>\%
+  assign_workcharge(bevs_20k, bev_chargeprob)
+
+ev_workplace_demand_phev10 <- ev_commuter_count \%>\%
+  assign_workcharge(bevs_10k, phev_chargeprob)
 }
