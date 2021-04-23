@@ -31,5 +31,6 @@ Remotes:
 Suggests: 
     rmarkdown,
     knitr,
-    roxygen2
+    roxygen2,
+    tidyverse
 VignetteBuilder: knitr

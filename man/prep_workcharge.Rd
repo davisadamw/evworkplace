@@ -14,7 +14,7 @@ prep_workcharge(ev_totals, ..., .ev_commute_frac = 0.6)
 \item{.ev_commute_frac}{What fraction of EVs are used for commuting? Default = 60\%}
 }
 \value{
-A dataset with one row for each home-work pair of block groups in the study area.
+A dataset with one row for each home-work pair of block groups in the study area, probably for use in \code{\link{assign_workcharge}}
 }
 \description{
 Assign EVs to commute routes
