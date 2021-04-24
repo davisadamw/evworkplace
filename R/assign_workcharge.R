@@ -64,7 +64,7 @@ prep_workcharge <- function(ev_totals, ..., .ev_commute_frac = 0.6) {
     dplyr::left_join(evworkplace::dvrpc_od, by = "Home_BlkGrp") %>%
     dplyr::with_groups(.data$Home_BlkGrp, dplyr::mutate, job_frac = .data$total_Jobs / sum(.data$total_Jobs)) %>%
     dplyr::select(.data$Home_BlkGrp, .data$Work_BlkGrp, .data$Distance, .data$job_frac, ...) %>%
-    dplyr::mutate(dplyr::across(-c(1:4), ~ . * .data$job_frac))
+    dplyr::mutate(dplyr::across(-c(1:4), ~ . * .data$job_frac), .keep = "unused")
 }
 
 
@@ -72,44 +72,46 @@ prep_workcharge <- function(ev_totals, ..., .ev_commute_frac = 0.6) {
 #'
 #' This function subsets the included charging probabilities to create a single charging scenario.
 #'
-#' Note: All fractions should be kept between 0-1, but the vehicle range fractions can also be expressed as relative weights.
+#' Note: All fractions should be kept between 0-1, but the vehicle range weights can also be expressed as any positive number
 #'
 #' @param use_BEV Use BEV charging probabilities? Otherwise use PHEV probabilities.
 #' @param single_family_home_frac Fraction of all electric vehicles owned by households in single-family homes
 #' @param sfh_homecharge Home charging availability in single-family homes, keep it between 0-1
 #' @param mud_homecharge Home charging availability in multi-unit dwellings, keep it between 0-1
-#' @param work_free Is charging free at commute destinations? `TRUE` or `FALSE`
+#' @param is_workcharge_free Is charging free at commute destinations? `TRUE` or `FALSE`
 #' @param rate_paid Electrical rate paid for home charging, keep it between 10-25 cents/kWh
-#' @param long_range_frac Fraction of long range vehicles, BEV range 220+ miles, PHEV range 80+ miles
-#' @param medium_range_frac Fraction of medium range vehicles, BEV range 140 miles, PHEV range 35 miles
-#' @param short_range_frac Fraction of short range vehicles, BEV range 75 miles, PHEV range 15 miles
+#' @param long_range_wt Share of long-range vehicles, BEV range 220+ miles, PHEV range 80+ miles
+#' @param medium_range_wt Share of medium-range vehicles, BEV range 120 miles, PHEV range 35 miles
+#' @param short_range_wt Share of short-range vehicles, BEV range 85 miles, PHEV range 20 miles
 #'
-#' @return A data frame of charging probabilities to use in \code{\link{assign_workcharge}}
+#'   Fraction of short range vehicles, BEV range 75 miles, PHEV range 15 miles
+#'
+#' @return A data frame of charging probabilities per commute distance to use in \code{\link{assign_workcharge}}
 #' @export
 #'
 #' @examples
 #' # Make a set of charging probabilities each for BEVs and PHEVs using the default values
 #' bev_chargeprob  <- make_workcharge_probs()
-#' phev_chargeprob <- make_workcharge_probs()
+#' phev_chargeprob <- make_workcharge_probs(use_BEV = FALSE)
 #'
 #' # create a set of probabilities for free work charging
-#' bev_chargeprob_wfree <- make_workcharge_probs(work_free = TRUE)
+#' bev_chargeprob_wfree <- make_workcharge_probs(is_workcharge_free = TRUE)
 make_workcharge_probs <- function(use_BEV = TRUE,
                                   single_family_home_frac = 0.9,
                                   sfh_homecharge = 0.9,
                                   mud_homecharge = 0.2,
-                                  work_free = FALSE,
+                                  is_workcharge_free = FALSE,
                                   rate_paid = 12.97,
-                                  long_range_frac   = 0.5,
-                                  medium_range_frac = 0.4,
-                                  short_range_frac  = 0.1) {
+                                  long_range_wt   = 0.5,
+                                  medium_range_wt = 0.4,
+                                  short_range_wt  = 0.1) {
   # first, check all arguments for the appropriate range
   if(min(single_family_home_frac, sfh_homecharge, mud_homecharge) < 0 |
      max(single_family_home_frac, sfh_homecharge, mud_homecharge) > 1) {
     stop("single_family_home_frac, sfh_homecharge, and mud_homecharge ",
          "must be fractions between 0 and 1")
   }
-  if(min(long_range_frac, medium_range_frac, short_range_frac) < 0) {
+  if(min(long_range_wt, medium_range_wt, short_range_wt) < 0) {
     stop("range fraction values must all be positive")
   }
   if(rate_paid < 10) {
