@@ -25,7 +25,8 @@ Imports:
     dplyr,
     purrr,
     tibble,
-    stats
+    stats,
+    tidyr
 Remotes: 
     davisadamw/stocked
 Suggests: 
