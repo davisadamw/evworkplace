@@ -8,7 +8,8 @@ assign_workcharge(
   prepped_data,
   commute_ev_col,
   charging_probs,
-  commute_miles_frac = 0.5,
+  scenario_name,
+  extra_daily_miles = 10,
   miles_per_kWh = 4
 )
 }
@@ -19,7 +20,9 @@ assign_workcharge(
 
 \item{charging_probs}{Work charging probabilities produced by \code{\link{make_workcharge_probs}}}
 
-\item{commute_miles_frac}{What fraction of total travel is for commute?}
+\item{scenario_name}{Text name of the combined adoption-charging scenario, used as prefix for column names in the output}
+
+\item{extra_daily_miles}{Non-commute travel per day, miles}
 
 \item{miles_per_kWh}{Vehicle miles per kilowatt hour}
 }
@@ -40,8 +43,8 @@ phev_chargeprob <- make_workcharge_probs(use_BEV = FALSE)
 
 # run the workplace charging calculator
 ev_workplace_demand_bev20 <- ev_commuter_count \%>\%
-  assign_workcharge(bevs_20k, bev_chargeprob)
+  assign_workcharge(bevs_20k, bev_chargeprob, "bev20k_basic")
 
 ev_workplace_demand_phev10 <- ev_commuter_count \%>\%
-  assign_workcharge(bevs_10k, phev_chargeprob)
+  assign_workcharge(phevs_10k, phev_chargeprob, "phev10k_basic")
 }

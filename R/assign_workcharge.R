@@ -5,7 +5,8 @@
 #' @param prepped_data EV commute counts produced by \code{\link{prep_workcharge}}
 #' @param commute_ev_col Unquoted name of column in `prepped_data` that contains the EV count for this scenario
 #' @param charging_probs Work charging probabilities produced by \code{\link{make_workcharge_probs}}
-#' @param commute_miles_frac What fraction of total travel is for commute?
+#' @param scenario_name Text name of the combined adoption-charging scenario, used as prefix for column names in the output
+#' @param extra_daily_miles Non-commute travel per day, miles
 #' @param miles_per_kWh Vehicle miles per kilowatt hour
 #'
 #' @return A data frame of work charging events and kWh for the scenario in each block group
@@ -22,15 +23,63 @@
 #'
 #' # run the workplace charging calculator
 #' ev_workplace_demand_bev20 <- ev_commuter_count %>%
-#'   assign_workcharge(bevs_20k, bev_chargeprob)
+#'   assign_workcharge(bevs_20k, bev_chargeprob, "bev20k_basic")
 #'
 #' ev_workplace_demand_phev10 <- ev_commuter_count %>%
-#'   assign_workcharge(bevs_10k, phev_chargeprob)
+#'   assign_workcharge(phevs_10k, phev_chargeprob, "phev10k_basic")
 assign_workcharge <- function(prepped_data,
                               commute_ev_col,
                               charging_probs,
-                              commute_miles_frac = 0.5,
+                              scenario_name,
+                              extra_daily_miles = 10,
                               miles_per_kWh = 4) {
+
+  # use approxfun to make functions which identify the nearest higher and lower computed distance
+  dist_lo_fun <- stats::approxfun(charging_probs$cmtdist,
+                                  charging_probs$cmtdist,
+                                  method = "constant", rule = 2, f = 0)
+  dist_hi_fun <- stats::approxfun(charging_probs$cmtdist,
+                                  charging_probs$cmtdist,
+                                  method = "constant", rule = 2, f = 1)
+
+  # grab only the columns that matter: work location, distance, and number of EVs
+  per_vehicle_info <- prepped_data %>%
+    dplyr::select(.data$Work_BlkGrp, .data$Distance, vehs = {{ commute_ev_col }}) %>%
+    dplyr::mutate(probs_dist_lo = dist_lo_fun(.data$Distance),
+                  probs_dist_hi = dist_hi_fun(.data$Distance),
+                  # compute the weight for the lower value to use for interpolation
+                  weight_lo = (.data$probs_dist_hi - .data$Distance) /
+                    (.data$probs_dist_hi - .data$probs_dist_lo),
+                  # when distance is out of range, weight_lo will be 0/0=NaN, so fix to 1
+                  weight_lo = dplyr::if_else(
+                    .data$probs_dist_lo == .data$probs_dist_hi, 1, .data$weight_lo)) %>%
+    # attach the appropriate charging probabilities
+    dplyr::left_join(charging_probs, by = c("probs_dist_lo" = "cmtdist")) %>%
+    dplyr::left_join(charging_probs, by = c("probs_dist_hi" = "cmtdist"),
+                     suffix = c("_lo", "_hi")) %>%
+    # use the weight to interpolate the event values between the commute distances
+    dplyr::mutate(tot_events = .data$tot_events_lo * .data$weight_lo +
+                    .data$tot_events_hi * (1 - .data$weight_lo),
+                  work_events = .data$work_events_lo * .data$weight_lo +
+                    .data$work_events_hi * (1 - .data$weight_lo),
+                  .keep = "unused") %>%
+    # compute daily miles and miles per event
+    dplyr::mutate(daily_miles     = .data$Distance + extra_daily_miles,
+                  daily_kWh       = .data$daily_miles / miles_per_kWh,
+                  kWh_per_event   = .data$daily_kWh / .data$tot_events,
+                  daily_work_kWh  = .data$work_events * .data$kWh_per_event) %>%
+    # scale everything by number of vehicles
+    dplyr::mutate(work_charging_events = .data$vehs * .data$work_events,
+                  work_charging_kWh    = .data$vehs * .data$daily_work_kWh)
+
+  per_vehicle_info %>%
+    # # and sum up per work block group
+    dplyr::with_groups(.data$Work_BlkGrp, dplyr::summarise,
+                       work_vehicles = sum(.data$vehs),
+                       work_events   = sum(.data$work_charging_events),
+                       work_kWh      = sum(.data$work_charging_kWh)) %>%
+    # add scenario name prefix to the new columns
+    dplyr::rename_with(~ paste(scenario_name, .x, sep = "_"), -1)
 
 }
 
