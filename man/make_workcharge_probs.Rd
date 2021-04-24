@@ -9,11 +9,11 @@ make_workcharge_probs(
   single_family_home_frac = 0.9,
   sfh_homecharge = 0.9,
   mud_homecharge = 0.2,
-  work_free = FALSE,
+  is_workcharge_free = FALSE,
   rate_paid = 12.97,
-  long_range_frac = 0.5,
-  medium_range_frac = 0.4,
-  short_range_frac = 0.1
+  long_range_wt = 0.5,
+  medium_range_wt = 0.4,
+  short_range_wt = 0.1
 )
 }
 \arguments{
@@ -25,30 +25,32 @@ make_workcharge_probs(
 
 \item{mud_homecharge}{Home charging availability in multi-unit dwellings, keep it between 0-1}
 
-\item{work_free}{Is charging free at commute destinations? \code{TRUE} or \code{FALSE}}
+\item{is_workcharge_free}{Is charging free at commute destinations? \code{TRUE} or \code{FALSE}}
 
 \item{rate_paid}{Electrical rate paid for home charging, keep it between 10-25 cents/kWh}
 
-\item{long_range_frac}{Fraction of long range vehicles, BEV range 220+ miles, PHEV range 80+ miles}
+\item{long_range_wt}{Share of long-range vehicles, BEV range 220+ miles, PHEV range 80+ miles}
 
-\item{medium_range_frac}{Fraction of medium range vehicles, BEV range 140 miles, PHEV range 35 miles}
+\item{medium_range_wt}{Share of medium-range vehicles, BEV range 120 miles, PHEV range 35 miles}
 
-\item{short_range_frac}{Fraction of short range vehicles, BEV range 75 miles, PHEV range 15 miles}
+\item{short_range_wt}{Share of short-range vehicles, BEV range 85 miles, PHEV range 20 miles
+
+Fraction of short range vehicles, BEV range 75 miles, PHEV range 15 miles}
 }
 \value{
-A data frame of charging probabilities to use in \code{\link{assign_workcharge}}
+A data frame of charging probabilities per commute distance to use in \code{\link{assign_workcharge}}
 }
 \description{
 This function subsets the included charging probabilities to create a single charging scenario.
 }
 \details{
-Note: All fractions should be kept between 0-1, but the vehicle range fractions can also be expressed as relative weights.
+Note: All fractions should be kept between 0-1, but the vehicle range weights can also be expressed as any positive number
 }
 \examples{
 # Make a set of charging probabilities each for BEVs and PHEVs using the default values
 bev_chargeprob  <- make_workcharge_probs()
-phev_chargeprob <- make_workcharge_probs()
+phev_chargeprob <- make_workcharge_probs(use_BEV = FALSE)
 
 # create a set of probabilities for free work charging
-bev_chargeprob_wfree <- make_workcharge_probs(work_free = TRUE)
+bev_chargeprob_wfree <- make_workcharge_probs(is_workcharge_free = TRUE)
 }
