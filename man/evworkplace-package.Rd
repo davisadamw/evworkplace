@@ -4,7 +4,7 @@
 \name{evworkplace-package}
 \alias{evworkplace}
 \alias{evworkplace-package}
-\title{evworkplace: Produce Workplace Charging Demand for an EV Ownership Scenario}
+\title{evworkplace: Produce Workplace Charging Demand for an EV Ownership Scenario (DVRPC)}
 \description{
 This package estimates workplace charging demand for an EV adoption scenario produced using the stocked package.
 }

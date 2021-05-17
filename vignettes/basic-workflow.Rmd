@@ -22,13 +22,35 @@ library(tidyverse)
 library(evworkplace)
 ```
 
-The functions in this package have defaults set for all parameters, but it's a good idea to specify them individually. The parameters for this analysis are:
+The functions in this package have defaults set for all parameters, but it's a good idea to specify them individually. The main parameters for this analysis are:
 * Maximum EV fraction in a single block group (default = 70%)
 * Commute fraction for EVs (default = 60%)
+* Extra miles to drive per day (default = 10)
 ```{r params}
 max_ev_fraction  <- 0.7
 commute_fraction <- 0.6
+extra_miles      <- 10
 ```
+
+Some other paramters can affect charging probabilities at homes and commute destinations.
+The charging parameters for this analysis are:
+* Fraction of EVs assigned to single family homes (default = 90%)
+* Fraction of EVs in single family homes with access to charging at home (default = 90%)
+* Fraction of EVs in multi-unit dwellings with access to charging at home (default = 10%)
+* Is charging at commute destinations free to users? TRUE/FALSE
+* Electricity rate paid for home charging (default = 12.97 cents per kWh)
+* Proportion of long/medium/short range vehicles of each type to include (default = 50% long, 40% medium) ... range definitions for can be found in the documentation for the make_workcharge_probs function.
+```{r params-charging}
+single_family_home <- 0.9
+sfh_home           <- 0.9
+mud_home           <- 0.2
+is_workcharge_free <- FALSE
+rate_paid          <- 12.97
+long_range         <- 0.5
+medium_range       <- 0.4
+short_range        <- 0.1
+```
+
 
 
 ## Prepare data and assign EVs
@@ -52,8 +74,106 @@ adoption_scenario <- prepped_data %>%
   assign_evs(250000, evworkplace::assignment_model_coefficients$CA_bev,  "bevs_250k") %>%
   assign_evs(100000, evworkplace::assignment_model_coefficients$CA_phev, "phevs_100k")
 
-adoption_scenario %>% 
+adoption_scenario <- adoption_scenario %>% 
   select(GEOID, bevs_250k, phevs_100k)
+
+adoption_scenario
+
+```
+
+## Compute Demand for Charging at Commute Destinations
+
+After assigning vehicles to households, the next step is to link those vehicles to commute destinations and estimate workplace charging needs.
+
+
+First, assign the vehicles to commute destinations. This will likely take longer than previous steps. The only parameter to worry about here is the share of vehicles used for commuting. 
+```{r assign-commute-dests}
+commute_locations <- adoption_scenario %>% 
+  prep_workcharge(bevs_250k, phevs_100k, .ev_commute_frac = commute_fraction)
+```
+
+Then, create a scenario for workplace charging probabilities. You can generate multiple scenarios to look at the impacts of charging parameters, but it's generally best to have at least one for BEVs and one for PHEVs. The function used here will generate home charging probabilities for vehicles with various commute distances.
+
+In this example, a single set of parameters is used for both BEV and PHEV charging scenarios, but you could use different parameters for each vehicle type or generate multiple scenarios to compare. The `is_workcharge_free` variable has a particularly strong impact on people's charging behavior.
+```{r make-probs}
+
+bev_chargeprob  <- make_workcharge_probs(
+  use_BEV = TRUE,
+  single_family_home_frac = single_family_home,
+  sfh_homecharge = sfh_home,
+  mud_homecharge = mud_home,
+  is_workcharge_free = is_workcharge_free,
+  rate_paid = rate_paid,
+  long_range_wt = long_range,
+  medium_range_wt = medium_range,
+  short_range_wt = short_range)
+
+phev_chargeprob <- make_workcharge_probs(
+  use_BEV = FALSE,
+  single_family_home_frac = single_family_home,
+  sfh_homecharge = sfh_home,
+  mud_homecharge = mud_home,
+  is_workcharge_free = is_workcharge_free,
+  rate_paid = rate_paid,
+  long_range_wt = long_range,
+  medium_range_wt = medium_range,
+  short_range_wt = short_range)
+
+
+```
+
+Finally, combine the commute assignment with the charging probabilities to create a complete set of charging probabilities at commute destinations.
+```{r assign-workcharge}
+
+ev_workplace_demand_bev250 <- commute_locations %>%
+  assign_workcharge(bevs_250k, bev_chargeprob, "bev250k_basic")
+
+ev_workplace_demand_phev100 <- commute_locations %>%
+  assign_workcharge(phevs_100k, phev_chargeprob, "phev100k_basic")
+```
+
+## Save model outputs
+
+You probably want to combine the adoption and workplace scenarios into a single table. You can do that like this:
+```{r combine-tables}
+output_table <- adoption_scenario %>% 
+  left_join(ev_workplace_demand_bev250, by =  c("GEOID" = "Work_BlkGrp")) %>% 
+  left_join(ev_workplace_demand_phev100, by = c("GEOID" = "Work_BlkGrp"))
+```
+
+
+You can save the adoption scenario and workplace charging results as a csv file like this:
+```{r write-csv, eval=FALSE}
+output_directory <- "my/directory/path" # replace this with a path to a folder where you'd like to store the results.
+
+output_table %>% 
+  write_csv(file.path(output_directory, "adoption_and_workcharging_scenario.csv"))
+```
+
+Alternatively, you can export the data directly to the clipboard and paste it into excel or another spreadsheet program. This can be especially useful if you're working in a state that has a FIPS code starting starting with "0" (AK, AL, AR, AZ, CA, CO, CT).
+```{r write-clip, eval=FALSE}
+output_table %>% 
+  clipr::write_clip()
+
+```
+
+Alternatively, you can attach the columns to a shapefile of block group boundaries using the SF package (although you might need to adjust column names / lengths a bit to get it to write properly):
+```{r write-shp, eval=FALSE}
+
+library(sf)
+
+# load a shapefile of block group boundaries (NOTE: the GEOID / FIPS column in this dataset must be formatted as character/text)
+bg_shp <- read_sf("my/shapefile/directory/dvrpc_bgs.shp")
+
+shp_fips_colname <- "GEOID"
+
+# attach adoption and charging details to this shapefile
+bg_shp_with_details <- bg_shp %>% 
+  left_join(output_table, by = c(shp_fips_colname = "GEOID"))
+
+# and write to disk
+bg_shp_with_details %>% 
+  write_sf("my/shapefile/directory/dvrpc_bgs_evscenario.shp")
 
 ```
 

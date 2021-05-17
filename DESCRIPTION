@@ -1,6 +1,6 @@
 Package: evworkplace
-Title: Produce Workplace Charging Demand for an EV Ownership Scenario
-Version: 0.0.0.9000
+Title: Produce Workplace Charging Demand for an EV Ownership Scenario (DVRPC)
+Version: 0.0.1
 Authors@R: 
     person(given = "Adam",
            family = "Davis",
