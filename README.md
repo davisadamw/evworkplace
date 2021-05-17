@@ -22,7 +22,7 @@ You can install the development version of this package from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("davisadamw/evworkplace")
+devtools::install_github("davisadamw/evworkplace", build_vignettes = TRUE)
 ```
 
 Installing this package should install the required package
